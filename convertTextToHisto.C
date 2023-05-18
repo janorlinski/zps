@@ -9,6 +9,8 @@
 
 TH1I* getHistoFromTxtFile (TString fileName) {
 	
+	//to jest metoda do robienia rzeczy fajnych
+	
 	//setup
 	
 	Bool_t verbatim = true; //choose whether you want to see all debug prompts
