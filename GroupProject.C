@@ -16,7 +16,7 @@ std::vector <double> LICZ ;
 std::ifstream myStr ; 
 
 double binx, countsx;
-myStr.open("100umRun11no0001Ge01.txt");
+myStr.open("20umRun47no0125Ge12.txt");
 
 if(!myStr) { // file couldn't be opened
       std::cerr << "Error: file could not be opened" <<std::endl;
@@ -42,6 +42,7 @@ while (myStr>>countsx)
    std::cout<<LICZ.size()<<std::endl;
    
    double dim = LICZ.size() ;
+   
 //wpisywanie z wektorów do histogramu .
   
 TH1I* Spec_uncal= new TH1I ("Spec_uncal","myhist",dim,0.,dim-1.);
@@ -62,14 +63,14 @@ TH1I* Spec_uncal= new TH1I ("Spec_uncal","myhist",dim,0.,dim-1.);
   Double_t* source = new Double_t [NBins];
   Double_t* destin = new Double_t [NBins];
 
-  for (i = 0; i < NBins; i++)  source[i] = Spec_uncal->GetBinContent (i);
+  for (i = 200; i < NBins-200; i++)  source[i] = Spec_uncal->GetBinContent (i+1);
 
-  TSpectrum* Analyser1dim = new TSpectrum (100); // note: default maxpositions = 100
+  TSpectrum* Analyser1dim = new TSpectrum (2); // note: default maxpositions = 100
 
   // Searching for Candidate Peaks' positions
 
   NFound = Analyser1dim->SearchHighRes (source, destin, NBins, 
-                                        1., 5.0, kFALSE, 10000, kFALSE, 0);
+                                        10., 50.0, kFALSE, 100, kFALSE, 0);
 
 
 
@@ -125,7 +126,7 @@ Double_t* Amplit = new Double_t [NFound];
   cin.ignore();
 
 TSpectrumFit* Fitter1dim = new TSpectrumFit (NFound);
- Fitter1dim->SetFitParameters (0, NBins-1 , 1000, 0.1, Fitter1dim->kFitOptimChiCounts,
+ Fitter1dim->SetFitParameters (200, NBins-1 , 1000, 0.1, Fitter1dim->kFitOptimChiCounts,
                                 Fitter1dim->kFitAlphaHalving, Fitter1dim->kFitPower2,
                                 Fitter1dim->kFitTaylorOrderFirst );
                                 
