@@ -9,8 +9,6 @@
 
 TH1I* getHistoFromTxtFile (TString fileName) {
 	
-	//to jest metoda do robienia rzeczy fajnych
-	
 	//setup
 	
 	Bool_t verbatim = true; //choose whether you want to see all debug prompts
@@ -26,6 +24,9 @@ TH1I* getHistoFromTxtFile (TString fileName) {
 		std::cerr << "Error: file could not be opened" <<std::endl;
 		exit(1);
 	}
+	
+	char* dummy;
+	myStr >> dummy;
 	
 	while (myStr >> value_temp) value.push_back(value_temp);
 	myStr.close (); 
@@ -67,8 +68,12 @@ void getHistosFromTxtFileList (TString fileList) {
 	TFile* fout = new TFile(fileNameRoot, "recreate");
 	
 	while (myStr >> file) {
-		TH1I* histo = getHistoFromTxtFile(TString(file));
-		histo->SetName(TString(file));
+		
+		TString fileName = TString(file);
+		
+		if (verbatim) cout << "Loading txt file '" << fileName << "'. \n"; 
+		TH1I* histo = getHistoFromTxtFile(fileName);
+		histo->SetName(fileName);
 		histo->Write();
 		
 	}
