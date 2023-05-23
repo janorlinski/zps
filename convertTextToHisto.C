@@ -19,7 +19,7 @@ Double_t gausswithlinearbkg (Double_t *xarg, Double_t *par)
 }
 
 
-void fitTwoGaussPeaksToHisto (TH1I Histogram) {
+void fitTwoGaussPeaksToHisto (TH1I Histogram, TFile* file) {
 	
 	std::cout << "fitting two Gauss peaks to file " << Histogram.GetName() << std::endl;
 	
@@ -56,23 +56,30 @@ void fitTwoGaussPeaksToHisto (TH1I Histogram) {
 	TF1* dopasowanie1 = new TF1("dopasowanie1", gausswithlinearbkg, Posit[0]-fitrange, Posit[0]+fitrange, 5);
 	TF1* dopasowanie2 = new TF1("dopasowanie2", gausswithlinearbkg, Posit[1]-fitrange, Posit[1]+fitrange, 5);
            
-        dopasowanie1->SetParameters(1000, Posit[0], 10, 0.0000000001, 0.00001);
-        dopasowanie1->SetParNames("Amplituda", "Srednia", "Sigma", "A", "B");
+	dopasowanie1->SetParameters(1000, Posit[0], 10, 0.0000000001, 0.00001);
+	dopasowanie1->SetParNames("Amplituda", "Srednia", "Sigma", "A", "B");
 
-        dopasowanie2->SetParameters(1000, Posit[1], 10, 0.0000000001, 0.00001);
-        dopasowanie2->SetParNames("Amplituda", "Srednia", "Sigma", "A", "B");
-          
-      	Histogram.Fit("dopasowanie1","MIQR","",Posit[0]-fitrange, Posit[0]+fitrange); //MIQR
-      	Histogram.Fit("dopasowanie2","MIQR","",Posit[1]-fitrange,Posit[1]+fitrange); //MIQR
-         
-    	Double_t sigma1 = dopasowanie1->GetParameter(2);
-    	Double_t sigma2 = dopasowanie2->GetParameter(2);
+	dopasowanie2->SetParameters(1000, Posit[1], 10, 0.0000000001, 0.00001);
+	dopasowanie2->SetParNames("Amplituda", "Srednia", "Sigma", "A", "B");
+	  
+	Histogram.Fit("dopasowanie1","MIQR+","",Posit[0]-fitrange, Posit[0]+fitrange); //MIQR
+	Histogram.Fit("dopasowanie2","MIQR+","",Posit[1]-fitrange,Posit[1]+fitrange); //MIQR
+	 
+	Double_t sigma1 = dopasowanie1->GetParameter(2);
+	Double_t sigma2 = dopasowanie2->GetParameter(2);
 
 	std::cout << "Found position: " << dopasowanie1->GetParameter(1) << " +/- " << dopasowanie1->GetParError(1) << "\n";
 	std::cout << "Found position: " << dopasowanie2->GetParameter(1) << " +/- " << dopasowanie2->GetParError(1) << "\n";
 	
-	dopasowanie1->Write();
-	dopasowanie2->Write();
+	dopasowanie1->Draw();
+	dopasowanie2->Draw();
+	
+	file->cd();
+	
+	Histogram.Write();
+	
+	//dopasowanie1->Write();
+	//dopasowanie2->Write();
 
 }
 
@@ -146,8 +153,8 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 		if (verbatim) cout << "Loading txt file '" << fileName << "'. \n"; 
 		TH1I histo = getHistoFromTxtFile(fileName);
 		histo.SetName(fileName);
-		fitTwoGaussPeaksToHisto(histo);
-		histo.Write();
+		fitTwoGaussPeaksToHisto(histo, fout);
+		//histo.Write();
 		histos.push_back(histo);
 	}
 	
@@ -161,7 +168,7 @@ int convertTextToHisto () {
 	TStopwatch t;
 	t.Start();
 
-	TString listName = "lista_10umRun20.list";
+	TString listName = "lista_jedenplik.txt";
 	std::cout << "Selected listName '" << listName << "'\n";
 	
 	std::vector<TH1I> histos = getHistosFromTxtFileList(listName);
