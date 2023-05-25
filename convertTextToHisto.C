@@ -34,11 +34,17 @@ vector <double> fitTwoGaussPeaksToHisto (TH1I Histogram, TFile* file) {
 	int loCut = 2000;
 	int hiCut = 5500;
 	double fitrange = 50.0;
-	std::vector < double > controlValues(4);
+	std::vector < double > controlValues(10);
 	controlValues[0] = 0.0;
 	controlValues[1] = 0.0;
 	controlValues[2] = 0.0;
 	controlValues[3] = 0.0;
+	controlValues[4] = 0.0;
+	controlValues[5] = 0.0;
+	controlValues[6] = 0.0;
+	controlValues[7] = 0.0;
+	controlValues[8] = 0.0;
+	controlValues[9] = 0.0;
 	
 	Double_t* source = new Double_t [NBins];
 	Double_t* destin = new Double_t [NBins];
@@ -72,9 +78,18 @@ vector <double> fitTwoGaussPeaksToHisto (TH1I Histogram, TFile* file) {
 	dopasowanie2->SetParameters(1000, Posit[1], 10, 0.0000000001, 0.00001);
 	dopasowanie2->SetParNames("Amplituda", "Srednia", "Sigma", "A", "B");
 	  
-	Histogram.Fit("dopasowanie1","MIQR+","",Posit[0]-fitrange, Posit[0]+fitrange); //MIQR
-	Histogram.Fit("dopasowanie2","MIQR+","",Posit[1]-fitrange,Posit[1]+fitrange); //MIQR
-	 
+	Histogram.Fit("dopasowanie1","MIRQ","",Posit[0]-fitrange, Posit[0]+fitrange); //MIQR
+	Histogram.Fit("dopasowanie2","MIRQ+","",Posit[1]-fitrange,Posit[1]+fitrange); //MIQR
+	
+	Double_t amplituda1 = dopasowanie1->GetParameter(0);
+	Double_t amplituda2 = dopasowanie2->GetParameter(0);
+
+	Double_t srednia1 = dopasowanie1->GetParameter(1);
+	Double_t srednia2 = dopasowanie2->GetParameter(1);
+
+	Double_t bladSredniej1 = dopasowanie1->GetParError(1);
+	Double_t bladSredniej2 = dopasowanie2->GetParError(1);
+
 	Double_t sigma1 = dopasowanie1->GetParameter(2);
 	Double_t sigma2 = dopasowanie2->GetParameter(2);
 	 
@@ -90,7 +105,13 @@ vector <double> fitTwoGaussPeaksToHisto (TH1I Histogram, TFile* file) {
 	controlValues[0] = sigma1;
 	controlValues[1] = sigma2;
 	controlValues[2] = chi2NDF1;
-	controlValues[3] = chi2NDF1;
+	controlValues[3] = chi2NDF2;
+	controlValues[4] = amplituda1;
+	controlValues[5] = amplituda2;
+	controlValues[6] = srednia1;
+	controlValues[7] = srednia2;
+	controlValues[8] = bladSredniej1;
+	controlValues[9] = bladSredniej2;
 
 	std::cout << "Found position: " << dopasowanie1->GetParameter(1) << " +/- " << dopasowanie1->GetParError(1) << "\n";
 	std::cout << "Found position: " << dopasowanie2->GetParameter(1) << " +/- " << dopasowanie2->GetParError(1) << "\n";
@@ -176,6 +197,12 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 	std::vector < double > sigma2vec;
 	std::vector < double > chi2NDF1vec;
 	std::vector < double > chi2NDF2vec;
+	std::vector < double > amplituda1vec;
+	std::vector < double > amplituda2vec;
+	std::vector < double > srednia1vec;
+	std::vector < double > srednia2vec;
+	std::vector < double > bladSredniej1vec;
+	std::vector < double > bladSredniej2vec;
 	//wczytywanie z pliku do wektorów
 
 	std::ifstream myStr;
@@ -204,6 +231,12 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 		sigma2vec.push_back(controlValues[1]);
 		chi2NDF1vec.push_back(controlValues[2]);
 		chi2NDF2vec.push_back(controlValues[3]);
+		amplituda1vec.push_back(controlValues[4]);
+		amplituda2vec.push_back(controlValues[5]);
+		srednia1vec.push_back(controlValues[6]);
+		srednia2vec.push_back(controlValues[7]);
+		bladSredniej1vec.push_back(controlValues[8]);
+		bladSredniej2vec.push_back(controlValues[9]);
 	}
 	
 	Double_t NHistos = histos.size();
@@ -212,6 +245,10 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 	TH1F* sigma2 = new TH1F("sigma2", "sigma2", NHistos, 0.5, NHistos+0.5);
 	TH1F* chi2NDF1 = new TH1F("chi2NDF1", "chi2NDF1", NHistos, 0.5, NHistos+0.5);
 	TH1F* chi2NDF2 = new TH1F("chi2NDF2", "chi2NDF2", NHistos, 0.5, NHistos+0.5);
+	TH1F* amplituda1 = new TH1F("amplituda1", "amplituda1", NHistos, 0.5, NHistos+0.5);
+	TH1F* amplituda2 = new TH1F("amplituda2", "amplituda2", NHistos, 0.5, NHistos+0.5);
+	TH1F* srednia1 = new TH1F("srednia1", "srednia1", NHistos, 0.5, NHistos+0.5);
+	TH1F* srednia2 = new TH1F("srednia2", "srednia2", NHistos, 0.5, NHistos+0.5);
 	
 	for (int i=0; i<NHistos; i++) {
 		
@@ -219,11 +256,21 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 		sigma2->SetBinContent(i+1, sigma2vec[i]);
 		chi2NDF1->SetBinContent(i+1, chi2NDF1vec[i]);
 		chi2NDF2->SetBinContent(i+1, chi2NDF2vec[i]);
+		amplituda1->SetBinContent(i+1, amplituda1vec[i]);
+		amplituda2->SetBinContent(i+1, amplituda2vec[i]);
+		srednia1->SetBinContent(i+1, srednia1vec[i]);
+		srednia2->SetBinContent(i+1, srednia2vec[i]);
+		srednia1->SetBinError(i+1, bladSredniej1vec[i]);
+		srednia2->SetBinError(i+1, bladSredniej2vec[i]);
 		
 		sigma1->GetXaxis()->SetBinLabel(i+1, names[i]);
 		sigma2->GetXaxis()->SetBinLabel(i+1, names[i]);
 		chi2NDF1->GetXaxis()->SetBinLabel(i+1, names[i]);
 		chi2NDF2->GetXaxis()->SetBinLabel(i+1, names[i]);
+		amplituda1->GetXaxis()->SetBinLabel(i+1, names[i]);
+		amplituda2->GetXaxis()->SetBinLabel(i+1, names[i]);
+		srednia1->GetXaxis()->SetBinLabel(i+1, names[i]);
+		srednia2->GetXaxis()->SetBinLabel(i+1, names[i]);
 		
 	}
 	
@@ -232,6 +279,10 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 	sigma2->Write();
 	chi2NDF1->Write();
 	chi2NDF2->Write();
+	amplituda1->Write();
+	amplituda2->Write();
+	srednia1->Write();
+	srednia2->Write();
 	fout->Close();
 	return histos;
 	
@@ -242,7 +293,7 @@ int convertTextToHisto () {
 	TStopwatch t;
 	t.Start();
 
-	TString listName = "lista_trzypliki.list";
+	TString listName = "lista_20umRun47Ge04.list";
 	std::cout << "Selected listName '" << listName << "'\n";
 	
 	std::vector<TH1I> histos = getHistosFromTxtFileList(listName);
