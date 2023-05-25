@@ -61,9 +61,15 @@ void wersja2(TString s){
     
     um=s[0];
     
-    if(slen==20){um.Append(s[1]); um.Append(s[2]);};
-    if(slen==19){um.Append(s[1]);};
-    if(slen==18){};
+    TString u = "u";
+    
+    TString s1 = s[1];
+    TString s2 = s[2];
+    TString s3 = s[3];
+    
+    if(s3.CompareTo(u)==0){um.Append(s1); um.Append(s2);};
+    if(s2.CompareTo(u)==0){um.Append(s1);};
+    if(s1.CompareTo(u)==0){};
     Int_t um_i = um.Atoi();
     
     
