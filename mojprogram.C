@@ -8,7 +8,7 @@
 void sciezka(TString s){
     
     
-    s.ReplaceAll("um","um/");
+    s.ReplaceAll("Run","/Run");
     s.ReplaceAll("no","/MCA/");
     s.ReplaceAll("Ge","/Ge");
     s.ReplaceAll(".txt",".cal");
