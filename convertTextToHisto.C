@@ -195,8 +195,10 @@ vector <double> fitTwoGaussPeaksToHisto (TH1I Histogram, TFile* file) {
 	// Double_t sigma3_init = 1.8229187;
 	// Double_t E3_init = 510.58772;
 	// Double_t sigma3_init = 3.1642358;
-	Double_t E3_init = 442.50045;
-	Double_t sigma3_init = 1.9985245;
+	//Double_t E3_init = 442.50045;
+	//Double_t sigma3_init = 1.9985245;
+	Double_t E3_init = 114.06316;
+	Double_t sigma3_init = 2.014632;
 	Double_t chan_E3_init = (E3_init-calibFunctionYIntercept)/calibFunctionSlope;
 	Double_t chan_sigma3_init = (sigma3_init-calibFunctionYIntercept)/calibFunctionSlope;
 
@@ -244,10 +246,14 @@ vector <double> fitTwoGaussPeaksToHisto (TH1I Histogram, TFile* file) {
 	//calibOut << srednia3 << "\n";
     calibOut.close();
 
-		name.ReplaceAll(".cal",".3pik");
+/*
+
+	name.ReplaceAll(".cal",".3pik");
 	ofstream pik3out(name);
-		pik3out << srednia3 << "\n";
+	pik3out << srednia3 << "\n";
 	pik3out.close();
+	
+*/
 
 	return controlValues;
 
@@ -375,12 +381,15 @@ vector <double> fitTwoGaussPeaksToHistoLOAX (TH1I Histogram, TFile* file) {
 	//---------------------------------------------------------------------------
 	//dopasowanie trzeciego maksimum
 	//---------------------------------------------------------------------------
-	// Double_t E3_init = 367.62109;
-	// Double_t sigma3_init = 1.8229187;
-	// Double_t E3_init = 510.58772;
-	// Double_t sigma3_init = 3.1642358;
-	Double_t E3_init = 442.50045;
-	Double_t sigma3_init = 1.9985245;
+	
+	//Double_t E3_init = 367.62109;
+	//Double_t sigma3_init = 1.8229187;
+	//Double_t E3_init = 510.58772;
+	//Double_t sigma3_init = 3.1642358;
+	//Double_t E3_init = 442.50045;
+	//Double_t sigma3_init = 1.9985245;
+	Double_t E3_init = 114.06316;
+	Double_t sigma3_init = 2.014632;
 	Double_t chan_E3_init = (E3_init-calibFunctionYIntercept)/calibFunctionSlope;
 	Double_t chan_sigma3_init = (sigma3_init-calibFunctionYIntercept)/calibFunctionSlope;
 
@@ -394,17 +403,11 @@ vector <double> fitTwoGaussPeaksToHistoLOAX (TH1I Histogram, TFile* file) {
 	Histogram.Fit("dopasowanie3","MIRQ+","",chan_E3_init - f1*chan_sigma3_init, chan_E3_init + f2*chan_sigma3_init);
 
 	Double_t amplituda3 = dopasowanie3->GetParameter(0);
-
 	Double_t srednia3 = dopasowanie3->GetParameter(1);
-
 	Double_t bladSredniej3 = dopasowanie3->GetParError(1);
-
 	Double_t sigma3 = dopasowanie3->GetParameter(2);
-
 	Double_t chi23 = dopasowanie3->GetChisquare();
-
 	Double_t NDF3 = dopasowanie3->GetNDF();
-
 	Double_t chi2NDF3 = chi23 / NDF3;
 
 	controlValues[10] = sigma3;
@@ -427,143 +430,15 @@ vector <double> fitTwoGaussPeaksToHistoLOAX (TH1I Histogram, TFile* file) {
 	calibOut << calibFunctionSlope << "\n";
 	//calibOut << srednia3 << "\n";
     calibOut.close();
-
-		name.ReplaceAll(".cal",".3pik");
-	ofstream pik3out(name);
-		pik3out << srednia3 << "\n";
-	pik3out.close();
-
-	return controlValues;
-
-}
-
 /*
-
-vector <double> fitTwoGaussPeaksToHistoLOAX (TH1I Histogram, TFile* file) {
-
-	// 279.01 keV
-	// 547.5  keV
-
-	//pik 279.01 keV to ok. 7848
-	//pik 547.5 keV to ok. 15400
-
-	
-	std::cout << "fitting two LOAX sGauss peaks to file " << Histogram.GetName() << std::endl;
-	
-	int i, NFound, NBins, binnum;
-	NBins = Histogram.GetNbinsX();
-	int loCut = 7000;
-	int hiCut = 16200;
-	double fitrange = 50.0;
-	std::vector < double > controlValues(10);
-	controlValues[0] = 0.0;
-	controlValues[1] = 0.0;
-	controlValues[2] = 0.0;
-	controlValues[3] = 0.0;
-	controlValues[4] = 0.0;
-	controlValues[5] = 0.0;
-	controlValues[6] = 0.0;
-	controlValues[7] = 0.0;
-	controlValues[8] = 0.0;
-	controlValues[9] = 0.0;
-	
-	Double_t* source = new Double_t [NBins];
-	Double_t* destin = new Double_t [NBins];
-	
-	for (i = 0; i < NBins; i++) {
-		source[i] = Histogram.GetBinContent (i+1);
-		if (i<loCut || i>hiCut) source[i] = 0;
-	}
-	
-	TSpectrum* Analyser1dim = new TSpectrum (2); 
-	NFound = Analyser1dim->SearchHighRes (source, destin, NBins, 10.0, 20.0, kFALSE, 100, kFALSE, 0);
-
-	//cout << "SearchHighRes has found: " << NFound << " peaks \n";
-
-	file->cd();
-
-	if (NFound < 2 || NFound > 2) {
-		std::cout << "N peaks not eq to 2, abort fitting \n";
-		Histogram.Write();
-		return controlValues;
-	}
-
-	Double_t* Posit  = Analyser1dim->GetPositionX ();
-
-	TF1* dopasowanie1 = new TF1("dopasowanie1", gausswithlinearbkg, Posit[0]-fitrange, Posit[0]+fitrange, 5);
-	TF1* dopasowanie2 = new TF1("dopasowanie2", gausswithlinearbkg, Posit[1]-fitrange, Posit[1]+fitrange, 5);
-           
-	dopasowanie1->SetParameters(1000, Posit[0], 10, 0.0000000001, 0.00001);
-	dopasowanie1->SetParNames("Amplituda", "Srednia", "Sigma", "A", "B");
-
-	dopasowanie2->SetParameters(1000, Posit[1], 10, 0.0000000001, 0.00001);
-	dopasowanie2->SetParNames("Amplituda", "Srednia", "Sigma", "A", "B");
-	  
-	Histogram.Fit("dopasowanie1","MIRQ","",Posit[0]-fitrange, Posit[0]+fitrange); //MIQR
-	Histogram.Fit("dopasowanie2","MIRQ+","",Posit[1]-fitrange,Posit[1]+fitrange); //MIQR
-	
-	Double_t amplituda1 = dopasowanie1->GetParameter(0);
-	Double_t amplituda2 = dopasowanie2->GetParameter(0);
-
-	Double_t srednia1 = dopasowanie1->GetParameter(1);
-	Double_t srednia2 = dopasowanie2->GetParameter(1);
-
-	Double_t bladSredniej1 = dopasowanie1->GetParError(1);
-	Double_t bladSredniej2 = dopasowanie2->GetParError(1);
-
-	Double_t sigma1 = dopasowanie1->GetParameter(2);
-	Double_t sigma2 = dopasowanie2->GetParameter(2);
-	 
-	Double_t chi21 = dopasowanie1->GetChisquare();
-	Double_t chi22 = dopasowanie2->GetChisquare();
-	 
-	Double_t NDF1 = dopasowanie1->GetNDF();
-	Double_t NDF2 = dopasowanie2->GetNDF();
-	 
-	Double_t chi2NDF1 = chi21 / NDF1;
-	Double_t chi2NDF2 = chi22 / NDF2;
-	
-	controlValues[0] = sigma1;
-	controlValues[1] = sigma2;
-	controlValues[2] = chi2NDF1;
-	controlValues[3] = chi2NDF2;
-	controlValues[4] = amplituda1;
-	controlValues[5] = amplituda2;
-	controlValues[6] = srednia1;
-	controlValues[7] = srednia2;
-	controlValues[8] = bladSredniej1;
-	controlValues[9] = bladSredniej2;
-
-	//std::cout << "Found position: " << dopasowanie1->GetParameter(1) << " +/- " << dopasowanie1->GetParError(1) << "\n";
-	//std::cout << "Found position: " << dopasowanie2->GetParameter(1) << " +/- " << dopasowanie2->GetParError(1) << "\n";
-	
-	Histogram.Write();
-	
-	// obliczanie kalibracji
-	
-	Double_t y1 = 279.01;
-	Double_t y2 = 547.5;
-	
-	Double_t x1 = dopasowanie1->GetParameter(1);
-	Double_t x2 = dopasowanie2->GetParameter(1);
-	
-	Double_t calibFunctionSlope = (y1 - y2)/(x1 - x2);
-	Double_t calibFunctionYIntercept  = (-1.0) * calibFunctionSlope * x1 + y1;
-	
-	TString name = Histogram.GetName();
-	name.ReplaceAll(".txt", ".cal");
-    
-	ofstream calibOut(name);
-	calibOut << calibFunctionYIntercept << "\n";
-	calibOut << calibFunctionSlope << "\n";
-	calibOut.close();
-
+	name.ReplaceAll(".cal",".3pik");
+	ofstream pik3out(name);
+	pik3out << srednia3 << "\n";
+	pik3out.close();
+*/
 	return controlValues;
 
 }
-
-
-*/
 
 TH1I getHistoFromTxtFile (TString fileName) {
 
