@@ -861,11 +861,11 @@ Int_t getHistosFromTxtFileListLOAX (TString fileList) {
 int convertTextToHisto () {
 
 	Double_t totalTime = 0;
-	//const Int_t nSpectra = 1;
-	const Int_t nSpectra = 16;
+	const Int_t nSpectra = 1;
+	//const Int_t nSpectra = 16;
 	Int_t nHistos = 0;
-	TString listNames[nSpectra] = {"Ge01.list", "Ge02.list", "Ge03.list", "Ge04.list", "Ge05.list", "Ge06.list", "Ge07.list", "Ge08.list", "Ge09.list", "Ge10.list", "Ge11.list", "Ge12.list", "Ge13.list", "Ge14.list", "Ge15.list", "Ge16.list"};	
-	//TString listNames[nSpectra] = {"Ge13.list"};
+	//TString listNames[nSpectra] = {"Ge01.list", "Ge02.list", "Ge03.list", "Ge04.list", "Ge05.list", "Ge06.list", "Ge07.list", "Ge08.list", "Ge09.list", "Ge10.list", "Ge11.list", "Ge12.list", "Ge13.list", "Ge14.list", "Ge15.list", "Ge16.list"};	
+	TString listNames[nSpectra] = {"Ge13.list"};
 
 	for (Int_t i=0; i<nSpectra; i++) {
 
