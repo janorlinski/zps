@@ -42,17 +42,6 @@ Int_t GetGeNumberFromFilename (TString s) {
     if(s1.CompareTo(u)==0){};
     Int_t um_i = um.Atoi();
     
-    
-    run=s[slen-12];
-    run.Append(s[slen-11]);
-    Int_t run_i = run.Atoi();
-    
-    no=s[slen-8];
-    no.Append(s[slen-7]);
-    no.Append(s[slen-6]);
-    no.Append(s[slen-5]);
-    Int_t no_i = no.Atoi();
-    
     ge=s[slen-2];
     ge.Append(s[slen-1]);
     Int_t ge_i = ge.Atoi();
@@ -73,6 +62,48 @@ Int_t GetGeNumberFromFilename (TString s) {
 */
 
 	return ge_i;  
+    
+}Int_t GetRunNumberFromFilename (TString s) {
+    
+    s.ReplaceAll(".txt","");
+    Int_t slen=s.Length();
+    
+    TString um, run, no, ge;
+    
+    um=s[0];
+    
+    TString u = "u";
+    
+    TString s1 = s[1];
+    TString s2 = s[2];
+    TString s3 = s[3];
+    
+    if(s3.CompareTo(u)==0){um.Append(s1); um.Append(s2);};
+    if(s2.CompareTo(u)==0){um.Append(s1);};
+    if(s1.CompareTo(u)==0){};
+    Int_t um_i = um.Atoi();
+    
+    
+    run=s[slen-12];
+    run.Append(s[slen-11]);
+    Int_t run_i = run.Atoi();
+    
+/*
+    //TString
+    std::cout<<"Odleglosc: "<<um<<" um"<<std::endl;
+    std::cout<<"Numer runu: "<<run<<std::endl;
+    std::cout<<"Numer: "<<no<<std::endl;
+    std::cout<<"Numer detektora: "<<ge<<std::endl;
+    
+    
+    //Int_t
+    std::cout<<"Odleglosc: "<<um_i<<" um"<<std::endl;
+      std::cout<<"Numer runu: "<<run_i<<std::endl;
+      std::cout<<"Numer: "<<no_i<<std::endl;
+      std::cout<<"Numer detektora: "<<ge_i<<std::endl;
+*/
+
+	return run_i;  
     
 }
 
@@ -485,7 +516,7 @@ TH1I getHistoFromTxtFile (TString fileName) {
 
 }
 
-vector<TH1I> getHistosFromTxtFileList (TString fileList) {
+Int_t getHistosFromTxtFileList (TString fileList) {
 
 	//setup
 
@@ -494,7 +525,8 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 	fileNameRoot.ReplaceAll(".list", ".root");
 	if (verbatim) std::cout << "hello" << std::endl;
 
-	std::vector < TH1I > histos;
+	Int_t NHistos = 0;
+	//std::vector < TH1I > histos;
 	std::vector < TString > names;
 	std::vector < double > sigma1vec;
 	std::vector < double > sigma2vec;
@@ -536,7 +568,9 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 		if (GetGeNumberFromFilename(fileName) == 13) controlValues = fitTwoGaussPeaksToHistoLOAX(histo, fout);
 		else controlValues = fitTwoGaussPeaksToHisto(histo, fout);
 
-		histos.push_back(histo);
+		NHistos++;
+
+		//histos.push_back(histo);
 		names.push_back(fileName);
 		sigma1vec.push_back(controlValues[0]);
 		sigma2vec.push_back(controlValues[1]);
@@ -559,7 +593,7 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 		bladEnergii3vec.push_back(controlValues[16]);
 	}
 
-	Double_t NHistos = histos.size();
+	//Double_t NHistos = histos.size();
 
 	TH1F* sigma1 = new TH1F("sigma1", "sigma1", NHistos, 0.5, NHistos+0.5);
 	TH1F* sigma2 = new TH1F("sigma2", "sigma2", NHistos, 0.5, NHistos+0.5);
@@ -641,17 +675,197 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 	std::cout << "Std deviation: " << energia3_hist->GetStdDev() << endl;
 
 	fout->Close();
-	return histos;
+	return NHistos;
+
+}
+
+Int_t getHistosFromTxtFileListLOAX (TString fileList) {
+
+	//setup
+
+	Bool_t verbatim = false; //choose whether you want to see all debug prompts
+	TString fileNameRoot = fileList;
+	fileNameRoot.ReplaceAll(".list", ".root");
+	if (verbatim) std::cout << "hello" << std::endl;
+
+	Int_t NHistos = 0;
+	//std::vector < TH1I > histos;
+	std::vector < TString > names;
+	std::vector < double > sigma1vec;
+	std::vector < double > sigma2vec;
+	std::vector < double > sigma3vec;
+	std::vector < double > chi2NDF1vec;
+	std::vector < double > chi2NDF2vec;
+	std::vector < double > chi2NDF3vec;
+	std::vector < double > amplituda1vec;
+	std::vector < double > amplituda2vec;
+	std::vector < double > amplituda3vec;
+	std::vector < double > srednia1vec;
+	std::vector < double > srednia2vec;
+	std::vector < double > srednia3vec;
+	std::vector < double > bladSredniej1vec;
+	std::vector < double > bladSredniej2vec;
+	std::vector < double > bladSredniej3vec;
+	std::vector < double > energia3vec;
+	std::vector < double > bladEnergii3vec;
+	//wczytywanie z pliku do wektorów
+
+	std::ifstream myStr;
+	TString file;
+	myStr.open(fileList);
+
+	if(!myStr) { // file couldn't be opened
+		std::cerr << "Error: file could not be opened" <<std::endl;
+		exit(1);
+	}
+
+	TFile* fout = new TFile(fileNameRoot, "recreate");
+
+	Int_t previousRunNumber = 0;
+	TH1I previousHisto = TH1I();
+
+	while (myStr >> file) {
+
+		TString fileName = TString(file);
+		vector<Double_t> controlValues;
+		if (verbatim) cout << "Loading txt file '" << fileName << "'. \n";
+
+		TH1I histo = getHistoFromTxtFile(fileName);
+		histo.SetName(fileName);
+
+		Int_t currentRunNumber = GetRunNumberFromFilename(fileName);
+		if (currentRunNumber == previousRunNumber) {
+			// if this is another subrun of the same run - subtract all subruns up to the previously analyzed one
+			if (verbatim) std::cout << "Subtracting spectra! Run number is: " << currentRunNumber << std::endl;
+			if (verbatim) std::cout << "Integrals of subtracted histos: " << histo.Integral() << " - " << previousHisto.Integral() << std::endl; 
+			histo.Add(&previousHisto, -1.0);
+			if (verbatim) std::cout << "Resulting integral: " << histo.Integral() << std::endl;
+		}
+
+		//update the values of previous run number / histo
+		previousRunNumber = currentRunNumber;
+		previousHisto = histo;
+
+		controlValues = fitTwoGaussPeaksToHistoLOAX(histo, fout);
+		NHistos++;
+
+		//histos.push_back(histo);
+		names.push_back(fileName);
+		sigma1vec.push_back(controlValues[0]);
+		sigma2vec.push_back(controlValues[1]);
+		chi2NDF1vec.push_back(controlValues[2]);
+		chi2NDF2vec.push_back(controlValues[3]);
+		amplituda1vec.push_back(controlValues[4]);
+		amplituda2vec.push_back(controlValues[5]);
+		srednia1vec.push_back(controlValues[6]);
+		srednia2vec.push_back(controlValues[7]);
+		bladSredniej1vec.push_back(controlValues[8]);
+		bladSredniej2vec.push_back(controlValues[9]);
+
+		sigma3vec.push_back(controlValues[10]);
+		chi2NDF3vec.push_back(controlValues[11]);
+		amplituda3vec.push_back(controlValues[12]);
+		srednia3vec.push_back(controlValues[13]);
+		bladSredniej3vec.push_back(controlValues[14]);
+
+		energia3vec.push_back(controlValues[15]);
+		bladEnergii3vec.push_back(controlValues[16]);
+	}
+
+	//Double_t NHistos = histos.size();
+
+	TH1F* sigma1 = new TH1F("sigma1", "sigma1", NHistos, 0.5, NHistos+0.5);
+	TH1F* sigma2 = new TH1F("sigma2", "sigma2", NHistos, 0.5, NHistos+0.5);
+	TH1F* chi2NDF1 = new TH1F("chi2NDF1", "chi2NDF1", NHistos, 0.5, NHistos+0.5);
+	TH1F* chi2NDF2 = new TH1F("chi2NDF2", "chi2NDF2", NHistos, 0.5, NHistos+0.5);
+	TH1F* amplituda1 = new TH1F("amplituda1", "amplituda1", NHistos, 0.5, NHistos+0.5);
+	TH1F* amplituda2 = new TH1F("amplituda2", "amplituda2", NHistos, 0.5, NHistos+0.5);
+	TH1F* srednia1 = new TH1F("srednia1", "srednia1", NHistos, 0.5, NHistos+0.5);
+	TH1F* srednia2 = new TH1F("srednia2", "srednia2", NHistos, 0.5, NHistos+0.5);
+
+	TH1F* sigma3 = new TH1F("sigma3", "sigma3", NHistos, 0.5, NHistos+0.5);
+	TH1F* chi2NDF3 = new TH1F("chi2NDF3", "chi2NDF3", NHistos, 0.5, NHistos+0.5);
+	TH1F* amplituda3 = new TH1F("amplituda3", "amplituda3", NHistos, 0.5, NHistos+0.5);
+	TH1F* srednia3 = new TH1F("srednia3", "srednia3", NHistos, 0.5, NHistos+0.5);
+
+	TH1F* energia3 = new TH1F("energia3", "energia3", NHistos, 0.5, NHistos+0.5);
+
+	TH1F* energia3_hist = new TH1F("energia3_hist", "energia3_hist", 100, 113, 115.2);
+
+	for (int i=0; i<NHistos; i++) {
+
+		sigma1->SetBinContent(i+1, sigma1vec[i]);
+		sigma2->SetBinContent(i+1, sigma2vec[i]);
+		chi2NDF1->SetBinContent(i+1, chi2NDF1vec[i]);
+		chi2NDF2->SetBinContent(i+1, chi2NDF2vec[i]);
+		amplituda1->SetBinContent(i+1, amplituda1vec[i]);
+		amplituda2->SetBinContent(i+1, amplituda2vec[i]);
+		srednia1->SetBinContent(i+1, srednia1vec[i]);
+		srednia2->SetBinContent(i+1, srednia2vec[i]);
+		srednia1->SetBinError(i+1, bladSredniej1vec[i]);
+		srednia2->SetBinError(i+1, bladSredniej2vec[i]);
+
+		sigma3->SetBinContent(i+1, sigma3vec[i]);
+		chi2NDF3->SetBinContent(i+1, chi2NDF3vec[i]);
+		amplituda3->SetBinContent(i+1, amplituda3vec[i]);
+		srednia3->SetBinContent(i+1, srednia3vec[i]);
+		srednia3->SetBinError(i+1, bladSredniej3vec[i]);
+
+		energia3->SetBinContent(i+1,energia3vec[i]);
+		energia3->SetBinError(i+1,bladEnergii3vec[i]);
+		energia3_hist->Fill(energia3vec[i]);
+
+
+		sigma1->GetXaxis()->SetBinLabel(i+1, names[i]);
+		sigma2->GetXaxis()->SetBinLabel(i+1, names[i]);
+		chi2NDF1->GetXaxis()->SetBinLabel(i+1, names[i]);
+		chi2NDF2->GetXaxis()->SetBinLabel(i+1, names[i]);
+		amplituda1->GetXaxis()->SetBinLabel(i+1, names[i]);
+		amplituda2->GetXaxis()->SetBinLabel(i+1, names[i]);
+		srednia1->GetXaxis()->SetBinLabel(i+1, names[i]);
+		srednia2->GetXaxis()->SetBinLabel(i+1, names[i]);
+
+		sigma3->GetXaxis()->SetBinLabel(i+1, names[i]);
+		chi2NDF3->GetXaxis()->SetBinLabel(i+1, names[i]);
+		amplituda3->GetXaxis()->SetBinLabel(i+1, names[i]);
+		srednia3->GetXaxis()->SetBinLabel(i+1, names[i]);
+
+		energia3->GetXaxis()->SetBinLabel(i+1, names[i]);
+
+	}
+
+	myStr.close ();
+	sigma1->Write();
+	sigma2->Write();
+	chi2NDF1->Write();
+	chi2NDF2->Write();
+	amplituda1->Write();
+	amplituda2->Write();
+	srednia1->Write();
+	srednia2->Write();
+
+	sigma3->Write();
+	chi2NDF3->Write();
+	amplituda3->Write();
+	srednia3->Write();
+
+	energia3->Write();
+	energia3_hist->Write();
+	std::cout << "Std deviation: " << energia3_hist->GetStdDev() << endl;
+
+	fout->Close();
+	return NHistos;
 
 }
 
 int convertTextToHisto () {
 
-	//const Int_t nSpectra = 15;
-	const Int_t nSpectra = 1;
-
-	//TString listNames[nSpectra] = {"Ge01.list", "Ge02.list", "Ge03.list", "Ge04.list", "Ge05.list", "Ge06.list", "Ge07.list", "Ge08.list", "Ge09.list", "Ge10.list", "Ge11.list", "Ge12.list", "Ge14.list", "Ge15.list", "Ge16.list"};	
-	TString listNames[nSpectra] = {"Ge13.list"};
+	Double_t totalTime = 0;
+	//const Int_t nSpectra = 1;
+	const Int_t nSpectra = 16;
+	Int_t nHistos = 0;
+	TString listNames[nSpectra] = {"Ge01.list", "Ge02.list", "Ge03.list", "Ge04.list", "Ge05.list", "Ge06.list", "Ge07.list", "Ge08.list", "Ge09.list", "Ge10.list", "Ge11.list", "Ge12.list", "Ge13.list", "Ge14.list", "Ge15.list", "Ge16.list"};	
+	//TString listNames[nSpectra] = {"Ge13.list"};
 
 	for (Int_t i=0; i<nSpectra; i++) {
 
@@ -661,13 +875,15 @@ int convertTextToHisto () {
 		TString listName = listNames[i];
 		std::cout << "Selected listName '" << listName << "'\n";
 
-		std::vector<TH1I> histos = getHistosFromTxtFileList(listName);
-		Int_t nHistos = histos.size();
+		if (listName == "Ge13.list") nHistos = getHistosFromTxtFileListLOAX(listName);
+		else nHistos = getHistosFromTxtFileList(listName);
 
 		Double_t time = t.RealTime();
 		std::cout << "Done analyzing " << nHistos << " spectra in " << time << " seconds. Av = " << time/nHistos << " seconds/spec. \n";
-	
+		totalTime += time;
 	}
+
+	std::cout << "Total runtime was: " << totalTime << "seconds." << std::endl;
 
 	return 0;
 
