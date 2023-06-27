@@ -11,6 +11,7 @@
 #include "TF1.h"
 #include "TStopwatch.h"
 
+
 Double_t gausswithlinearbkg (Double_t *xarg, Double_t *par) {
 	
 	Double_t x = xarg[0];
@@ -80,14 +81,14 @@ vector <double> fitTwoGaussPeaksToHisto (TH1I Histogram, TFile* file) {
 	// 279.01 keV
 	// 547.5  keV
 
-	std::cout << "fitting two Gauss peaks to file " << Histogram.GetName() << std::endl;
+	//std::cout << "fitting two Gauss peaks to file " << Histogram.GetName() << std::endl;
 
 	int i, NFound, NBins, binnum;
 	NBins = Histogram.GetNbinsX();
 	int loCut = 2000;
 	int hiCut = 5500;
 	double fitrange = 50.0;
-	std::vector < double > controlValues(16);
+	std::vector < double > controlValues(17);
 	controlValues[0] = 0.0;
 	controlValues[1] = 0.0;
 	controlValues[2] = 0.0;
@@ -104,6 +105,7 @@ vector <double> fitTwoGaussPeaksToHisto (TH1I Histogram, TFile* file) {
 	controlValues[13] = 0.0;
 	controlValues[14] = 0.0;
 	controlValues[15] = 0.0;
+	controlValues[16] = 0.0;
 
 	Double_t* source = new Double_t [NBins];
 	Double_t* destin = new Double_t [NBins];
@@ -116,7 +118,7 @@ vector <double> fitTwoGaussPeaksToHisto (TH1I Histogram, TFile* file) {
 	TSpectrum* Analyser1dim = new TSpectrum (2);
 	NFound = Analyser1dim->SearchHighRes (source, destin, NBins, 10.0, 50.0, kFALSE, 100, kFALSE, 0);
 
-	cout << "SearchHighRes has found: " << NFound << " peaks \n";
+	//cout << "SearchHighRes has found: " << NFound << " peaks \n";
 
 	file->cd();
 
@@ -172,8 +174,8 @@ vector <double> fitTwoGaussPeaksToHisto (TH1I Histogram, TFile* file) {
 	controlValues[8] = bladSredniej1;
 	controlValues[9] = bladSredniej2;
 
-	std::cout << "Found position: " << dopasowanie1->GetParameter(1) << " +/- " << dopasowanie1->GetParError(1) << "\n";
-	std::cout << "Found position: " << dopasowanie2->GetParameter(1) << " +/- " << dopasowanie2->GetParError(1) << "\n";
+	//std::cout << "Found position: " << dopasowanie1->GetParameter(1) << " +/- " << dopasowanie1->GetParError(1) << "\n";
+	//std::cout << "Found position: " << dopasowanie2->GetParameter(1) << " +/- " << dopasowanie2->GetParError(1) << "\n";
 
 	// Histogram.Write();
 
@@ -231,20 +233,21 @@ vector <double> fitTwoGaussPeaksToHisto (TH1I Histogram, TFile* file) {
 	controlValues[13] = srednia3;
 	controlValues[14] = bladSredniej3;
 	controlValues[15] = calibFunctionSlope*srednia3 + calibFunctionYIntercept;
+	controlValues[16] = calibFunctionSlope*bladSredniej3;
 
-	std::cout << "Found position: " << dopasowanie3->GetParameter(1) << " +/- " << dopasowanie3->GetParError(1) << "\n";
+	//std::cout << "Found position: " << dopasowanie3->GetParameter(1) << " +/- " << dopasowanie3->GetParError(1) << "\n";
 
 	Histogram.Write();
 	//---------------------------------------------------------------------------
 
 	TString name = Histogram.GetName();
-    name.ReplaceAll(".txt", ".cal");
+    	name.ReplaceAll(".txt", ".cal");
 
 	ofstream calibOut(name);
 	calibOut << calibFunctionYIntercept << "\n";
 	calibOut << calibFunctionSlope << "\n";
 	//calibOut << srednia3 << "\n";
-    calibOut.close();
+    	calibOut.close();
 
 /*
 
@@ -270,14 +273,14 @@ vector <double> fitTwoGaussPeaksToHistoLOAX (TH1I Histogram, TFile* file) {
 
 	*/
 	
-	std::cout << "fitting two LOAX sGauss peaks to file " << Histogram.GetName() << std::endl;
+	//std::cout << "fitting two LOAX sGauss peaks to file " << Histogram.GetName() << std::endl;
 	
 	int i, NFound, NBins, binnum;
 	NBins = Histogram.GetNbinsX();
 	int loCut = 7000;
 	int hiCut = 16200;
 	double fitrange = 50.0;
-	std::vector < double > controlValues(16);
+	std::vector < double > controlValues(17);
 	controlValues[0] = 0.0;
 	controlValues[1] = 0.0;
 	controlValues[2] = 0.0;
@@ -294,6 +297,7 @@ vector <double> fitTwoGaussPeaksToHistoLOAX (TH1I Histogram, TFile* file) {
 	controlValues[13] = 0.0;
 	controlValues[14] = 0.0;
 	controlValues[15] = 0.0;
+	controlValues[16] = 0.0;
 
 	Double_t* source = new Double_t [NBins];
 	Double_t* destin = new Double_t [NBins];
@@ -306,7 +310,7 @@ vector <double> fitTwoGaussPeaksToHistoLOAX (TH1I Histogram, TFile* file) {
 	TSpectrum* Analyser1dim = new TSpectrum (2);
 	NFound = Analyser1dim->SearchHighRes (source, destin, NBins, 10.0, 20.0, kFALSE, 100, kFALSE, 0);
 
-	cout << "SearchHighRes has found: " << NFound << " peaks \n";
+	//cout << "SearchHighRes has found: " << NFound << " peaks \n";
 
 	file->cd();
 
@@ -362,8 +366,8 @@ vector <double> fitTwoGaussPeaksToHistoLOAX (TH1I Histogram, TFile* file) {
 	controlValues[8] = bladSredniej1;
 	controlValues[9] = bladSredniej2;
 
-	std::cout << "Found position: " << dopasowanie1->GetParameter(1) << " +/- " << dopasowanie1->GetParError(1) << "\n";
-	std::cout << "Found position: " << dopasowanie2->GetParameter(1) << " +/- " << dopasowanie2->GetParError(1) << "\n";
+	//std::cout << "Found position: " << dopasowanie1->GetParameter(1) << " +/- " << dopasowanie1->GetParError(1) << "\n";
+	//std::cout << "Found position: " << dopasowanie2->GetParameter(1) << " +/- " << dopasowanie2->GetParError(1) << "\n";
 
 	// Histogram.Write();
 
@@ -416,8 +420,9 @@ vector <double> fitTwoGaussPeaksToHistoLOAX (TH1I Histogram, TFile* file) {
 	controlValues[13] = srednia3;
 	controlValues[14] = bladSredniej3;
 	controlValues[15] = calibFunctionSlope*srednia3 + calibFunctionYIntercept;
+	controlValues[16] = calibFunctionSlope*bladSredniej3;
 
-	std::cout << "Found position: " << dopasowanie3->GetParameter(1) << " +/- " << dopasowanie3->GetParError(1) << "\n";
+	//std::cout << "Found position: " << dopasowanie3->GetParameter(1) << " +/- " << dopasowanie3->GetParError(1) << "\n";
 
 	Histogram.Write();
 	//---------------------------------------------------------------------------
@@ -450,7 +455,7 @@ TH1I getHistoFromTxtFile (TString fileName) {
 	//wczytywanie z pliku do wektorów
 
 	std::ifstream myStr;
-	Int_t value_temp;
+	string value_temp;
 	myStr.open(fileName);
 
 	if(!myStr) { // file couldn't be opened
@@ -461,7 +466,7 @@ TH1I getHistoFromTxtFile (TString fileName) {
 	string dummy;
 	getline(myStr, dummy);
 
-	while (myStr >> value_temp) value.push_back(value_temp);
+	while (myStr >> value_temp) value.push_back(stoi(value_temp));
 	myStr.close ();
 
 	//wpisywanie z wektorów do histogramu
@@ -507,6 +512,7 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 	std::vector < double > bladSredniej2vec;
 	std::vector < double > bladSredniej3vec;
 	std::vector < double > energia3vec;
+	std::vector < double > bladEnergii3vec;
 	//wczytywanie z pliku do wektorów
 
 	std::ifstream myStr;
@@ -550,6 +556,7 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 		bladSredniej3vec.push_back(controlValues[14]);
 
 		energia3vec.push_back(controlValues[15]);
+		bladEnergii3vec.push_back(controlValues[16]);
 	}
 
 	Double_t NHistos = histos.size();
@@ -570,7 +577,7 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 
 	TH1F* energia3 = new TH1F("energia3", "energia3", NHistos, 0.5, NHistos+0.5);
 
-	TH1F* energia3_hist = new TH1F("energia3_hist", "energia3_hist", 100, 440, 445);
+	TH1F* energia3_hist = new TH1F("energia3_hist", "energia3_hist", 100, 113, 115.2);
 
 	for (int i=0; i<NHistos; i++) {
 
@@ -592,6 +599,7 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 		srednia3->SetBinError(i+1, bladSredniej3vec[i]);
 
 		energia3->SetBinContent(i+1,energia3vec[i]);
+		energia3->SetBinError(i+1,bladEnergii3vec[i]);
 		energia3_hist->Fill(energia3vec[i]);
 
 
@@ -630,6 +638,7 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 
 	energia3->Write();
 	energia3_hist->Write();
+	std::cout << "Std deviation: " << energia3_hist->GetStdDev() << endl;
 
 	fout->Close();
 	return histos;
@@ -638,17 +647,28 @@ vector<TH1I> getHistosFromTxtFileList (TString fileList) {
 
 int convertTextToHisto () {
 
-	TStopwatch t;
-	t.Start();
+	//const Int_t nSpectra = 15;
+	const Int_t nSpectra = 1;
 
-	TString listName = "lista_trzypliki.list";
-	std::cout << "Selected listName '" << listName << "'\n";
+	//TString listNames[nSpectra] = {"Ge01.list", "Ge02.list", "Ge03.list", "Ge04.list", "Ge05.list", "Ge06.list", "Ge07.list", "Ge08.list", "Ge09.list", "Ge10.list", "Ge11.list", "Ge12.list", "Ge14.list", "Ge15.list", "Ge16.list"};	
+	TString listNames[nSpectra] = {"Ge13.list"};
 
-	std::vector<TH1I> histos = getHistosFromTxtFileList(listName);
-	Int_t nHistos = histos.size();
+	for (Int_t i=0; i<nSpectra; i++) {
 
-	Double_t time = t.RealTime();
-	std::cout << "Done analyzing " << nHistos << " spectra in " << time << " seconds. Av = " << time/nHistos << " seconds/spec. \n";
+		TStopwatch t;
+		t.Start();
+
+		TString listName = listNames[i];
+		std::cout << "Selected listName '" << listName << "'\n";
+
+		std::vector<TH1I> histos = getHistosFromTxtFileList(listName);
+		Int_t nHistos = histos.size();
+
+		Double_t time = t.RealTime();
+		std::cout << "Done analyzing " << nHistos << " spectra in " << time << " seconds. Av = " << time/nHistos << " seconds/spec. \n";
+	
+	}
+
 	return 0;
 
 }
