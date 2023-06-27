@@ -723,6 +723,7 @@ Int_t getHistosFromTxtFileListLOAX (TString fileList) {
 
 	Int_t previousRunNumber = 0;
 	TH1I previousHisto = TH1I();
+	TH1I tempHisto = TH1I();
 
 	while (myStr >> file) {
 
@@ -732,6 +733,7 @@ Int_t getHistosFromTxtFileListLOAX (TString fileList) {
 
 		TH1I histo = getHistoFromTxtFile(fileName);
 		histo.SetName(fileName);
+		tempHisto = histo; //store a copy of the histogram 
 
 		Int_t currentRunNumber = GetRunNumberFromFilename(fileName);
 		if (currentRunNumber == previousRunNumber) {
@@ -744,7 +746,7 @@ Int_t getHistosFromTxtFileListLOAX (TString fileList) {
 
 		//update the values of previous run number / histo
 		previousRunNumber = currentRunNumber;
-		previousHisto = histo;
+		previousHisto = tempHisto;
 
 		controlValues = fitTwoGaussPeaksToHistoLOAX(histo, fout);
 		NHistos++;
